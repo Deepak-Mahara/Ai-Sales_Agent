@@ -1,0 +1,32 @@
+[
+  {
+    "id": "company_overview",
+    "keywords": ["company", "cloudflow", "about", "what", "do", "product", "software", "tool"],
+    "content": "CloudFlow is an AI-powered B2B project management and team collaboration SaaS platform built for growing startups and agencies. It automates task tracking, client reporting, and deadline alerts."
+  },
+  {
+    "id": "pricing_starter",
+    "keywords": ["price", "pricing", "cost", "plan", "starter", "basic", "cheap", "budget", "rupees", "rate"],
+    "content": "Starter Plan costs ₹999 per month (up to 5 users). Includes task boards, Slack integration, and email support."
+  },
+  {
+    "id": "pricing_pro",
+    "keywords": ["price", "pricing", "cost", "plan", "pro", "growth", "premium", "team", "features"],
+    "content": "Pro Plan costs ₹2,499 per month (up to 25 users). Includes AI sprint summaries, automated client reports, CRM sync, and priority 24/7 support."
+  },
+  {
+    "id": "pricing_enterprise",
+    "keywords": ["enterprise", "custom", "large", "company", "unlimited", "discount", "annual"],
+    "content": "Enterprise Plan has custom pricing starting at ₹7,999 per month for unlimited users, dedicated account manager, and custom SSO. Annual billing gives a 20% discount on all plans."
+  },
+  {
+    "id": "demo_trial",
+    "keywords": ["demo", "trial", "free", "book", "meeting", "appointment", "schedule", "call", "slot"],
+    "content": "We offer a 14-day free trial with no credit card required, plus a 15-minute live product demo with our specialists available Monday to Saturday, 10 AM to 7 PM IST."
+  },
+  {
+    "id": "security_compliance",
+    "keywords": ["security", "safe", "data", "privacy", "encryption", "backup"],
+    "content": "All customer data on CloudFlow is encrypted using AES-256 at rest and TLS 1.3 in transit, with automated daily cloud backups."
+  }
+]
