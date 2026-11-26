@@ -20,9 +20,11 @@ export default function App() {
   // Refs to avoid stale state inside Web Speech API callbacks
   const recognitionRef = useRef(null);
   const silenceTimerRef = useRef(null);
+  const echoTimerRef = useRef(null);
   const spokenBufferRef = useRef("");
   const transcriptRef = useRef([]);
   const isCallActiveRef = useRef(false);
+  const isAISpeakingRef = useRef(false);
   const languageRef = useRef("en-IN");
   const transcriptEndRef = useRef(null);
 
@@ -58,13 +60,16 @@ export default function App() {
     }
   };
 
-  const stopVoiceEngine = () => {
+  // Immediately kills the microphone so it cannot capture any audio
+  const stopListening = () => {
     clearTimeout(silenceTimerRef.current);
-    window.speechSynthesis.cancel();
+    clearTimeout(echoTimerRef.current);
     if (recognitionRef.current) {
       try {
+        recognitionRef.current.onresult = null;
         recognitionRef.current.onend = null;
-        recognitionRef.current.stop();
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.abort(); // Immediate cutoff (no trailing audio)
       } catch (e) {}
       recognitionRef.current = null;
     }
@@ -72,28 +77,44 @@ export default function App() {
     setLiveSpeech("");
   };
 
-  // Text-to-Speech (TTS)
-  const speakText = (text, onDone) => {
+  const stopVoiceEngine = () => {
+    isAISpeakingRef.current = false;
+    stopListening();
     window.speechSynthesis.cancel();
-    setStatus("AI Speaking...");
+  };
+
+  // Text-to-Speech (TTS): Locks mic completely while AI speaks
+  const speakText = (text, onDone) => {
+    isAISpeakingRef.current = true;
+    stopListening(); // Hard-kill mic before AI starts talking
+    window.speechSynthesis.cancel();
+    setStatus("AI Speaking (Mic Muted)...");
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = languageRef.current;
     utterance.rate = 1.03;
 
-    utterance.onend = () => {
-      if (isCallActiveRef.current && onDone) onDone();
+    const finishSpeaking = () => {
+      // Wait 350ms so speaker echo dies down before reopening mic
+      clearTimeout(echoTimerRef.current);
+      echoTimerRef.current = setTimeout(() => {
+        isAISpeakingRef.current = false;
+        if (isCallActiveRef.current && onDone) {
+          onDone();
+        }
+      }, 350);
     };
 
-    utterance.onerror = () => {
-      if (isCallActiveRef.current && onDone) onDone();
-    };
+    utterance.onend = finishSpeaking;
+    utterance.onerror = finishSpeaking;
 
     window.speechSynthesis.speak(utterance);
   };
 
   // Speech-to-Text (STT) with 1.5s silence detection
   const startListening = () => {
+    if (!isCallActiveRef.current || isAISpeakingRef.current) return;
+
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -102,12 +123,7 @@ export default function App() {
       return;
     }
 
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.onend = null;
-        recognitionRef.current.stop();
-      } catch (e) {}
-    }
+    stopListening();
 
     const recognition = new SpeechRecognition();
     recognition.lang = languageRef.current;
@@ -116,10 +132,15 @@ export default function App() {
     spokenBufferRef.current = "";
 
     recognition.onstart = () => {
-      setStatus("Listening...");
+      if (!isAISpeakingRef.current) {
+        setStatus("Listening...");
+      }
     };
 
     recognition.onresult = (event) => {
+      // Hard guard: ignore anything if AI is speaking or thinking
+      if (isAISpeakingRef.current || !isCallActiveRef.current) return;
+
       let finalChunk = "";
       let interimChunk = "";
 
@@ -143,20 +164,14 @@ export default function App() {
       if (combined.length > 0) {
         silenceTimerRef.current = setTimeout(() => {
           const finalMessage = combined;
-          spokenBufferRef.current = "";
-          setLiveSpeech("");
-
-          try {
-            recognition.onend = null;
-            recognition.stop();
-          } catch (e) {}
-
+          stopListening(); // Kill mic immediately while AI thinks & replies
           sendMessageToBackend(finalMessage);
         }, 1500);
       }
     };
 
     recognition.onerror = (event) => {
+      if (event.error === "aborted") return; // Expected when we mute mic
       console.error("Speech recognition error:", event.error);
       if (event.error === "not-allowed") {
         setStatus("Mic Permission Denied");
@@ -164,7 +179,12 @@ export default function App() {
     };
 
     recognition.onend = () => {
-      if (isCallActiveRef.current && !window.speechSynthesis.speaking) {
+      // Only auto-restart if call is active AND AI is definitely not speaking
+      if (
+        isCallActiveRef.current &&
+        !isAISpeakingRef.current &&
+        !window.speechSynthesis.speaking
+      ) {
         try {
           recognition.start();
         } catch (e) {}
@@ -241,6 +261,9 @@ export default function App() {
     const trimmed = textToSend.trim();
     if (!trimmed) return;
 
+    isAISpeakingRef.current = true; // Keep mic locked while waiting for API
+    stopListening();
+
     const currentHistory = transcriptRef.current;
     const updatedHistory = [...currentHistory, { speaker: "User", text: trimmed }];
     setTranscript(updatedHistory);
@@ -274,12 +297,15 @@ export default function App() {
         speakText(aiReply, () => {
           startListening();
         });
+      } else {
+        isAISpeakingRef.current = false;
       }
     } catch (err) {
       console.error("Chat API error:", err);
       const errMsg = "Server error. Make sure backend is running on port 5000.";
       setTranscript((prev) => [...prev, { speaker: "Agent", text: errMsg }]);
       setIsLoading(false);
+      isAISpeakingRef.current = false;
       setStatus("Error");
     }
   };
