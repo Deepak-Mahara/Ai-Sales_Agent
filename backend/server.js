@@ -48,14 +48,14 @@ function retrieveKnowledge(userQuery) {
     .slice(0, 3);
 
   if (topMatches.length === 0) {
-    return [knowledgeBase[0], knowledgeBase[4]];
+    return knowledgeBase.slice(0, 4);
   }
   return topMatches;
 }
 
 // Health check route
 app.get("/", (req, res) => {
-  res.json({ status: "CloudFlow AI Sales Backend is running" });
+  res.json({ status: "Fortivex AI Private Limited AI Sales Backend is running" });
 });
 
 // 1. Live voice chat endpoint
@@ -81,7 +81,7 @@ app.post("/api/chat", async (req, res) => {
         : "Reply in natural, polite, conversational English.";
 
     const prompt = `
-You are Alex, a friendly, concise AI Sales Representative for CloudFlow SaaS.
+You are Alex, a friendly, concise AI Sales Representative for Fortivex AI Private Limited.
 Keep your responses SHORT (2 to 3 sentences max) because your reply will be spoken aloud over a voice call. Never use markdown, bullet points, or asterisks.
 
 LANGUAGE RULE:
@@ -92,8 +92,8 @@ ${ragContext}
 
 STRICT GUARDRAILS:
 1. Only use the public facts provided above. If asked for internal operations, source code, private employee data, or unlisted secrets, politely say you only have access to public product info and offer to connect them with a manager.
-2. If the user says something off-topic, rude, or inappropriate, stay completely calm, ignore the provocation, and politely pivot back: "I am here to help you with CloudFlow's plans and features. Would you like to hear about our pricing or book a quick demo?"
-3. Gently qualify the lead during the conversation by asking about their team size, budget, or if they want to book a 15-minute demo (ask for their name and preferred date/time if they say yes).
+2. If the user says something off-topic, rude, or inappropriate, stay completely calm, ignore the provocation, and politely pivot back: "I am here to help with Fortivex AI Private Limited's AI automation, software development, and business technology services. Which area are you interested in?"
+3. Gently qualify the lead by asking about their goals, team size, or technical requirements. If they request a follow-up, ask for their preferred date and time.
 
 CONVERSATION HISTORY:
 ${formattedHistory}

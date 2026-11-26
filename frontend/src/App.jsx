@@ -205,8 +205,8 @@ export default function App() {
 
     const greeting =
       language === "hi-IN"
-        ? "नमस्ते! मैं CloudFlow से Alex बोल रहा हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?"
-        : "Hi! I'm Alex from CloudFlow SaaS. How can I help you today?";
+        ? "नमस्ते! मैं Fortivex AI Private Limited से Alex बोल रहा हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?"
+        : "Hi! I'm Alex from Fortivex AI Private Limited. How can I help you today?";
 
     isCallActiveRef.current = true;
     setIsCallActive(true);
@@ -336,7 +336,7 @@ export default function App() {
     <div className="app-container">
       {/* Header */}
       <header className="app-header">
-        <h1>CloudFlow AI Voice Sales Agent — MVP Dashboard</h1>
+        <h1>Fortivex AI Private Limited — AI Voice Sales Agent</h1>
         <span className="badge-live">Voice + RAG + MongoDB Live</span>
       </header>
 

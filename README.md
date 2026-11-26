@@ -1,12 +1,12 @@
-# CloudFlow AI Sales Agent
+# Fortivex AI Private Limited — AI Sales Agent
 
-An MVP sales assistant for CloudFlow SaaS. It provides a browser-based voice and text chat, answers product questions using a small keyword-based knowledge base, and saves analyzed sales calls as CRM leads in MongoDB.
+An MVP sales assistant for Fortivex AI Private Limited, a company focused on AI and automation, software development, and business technology. It provides browser-based voice and text chat, answers service questions using a keyword-based knowledge base, and saves analyzed sales calls as CRM leads in MongoDB.
 
 ## How it works
 
 1. The frontend captures speech with the browser's Web Speech API, or accepts typed messages.
 2. It sends each message, recent conversation history, and the selected language to the Express backend.
-3. The backend finds relevant entries in `backend/knowledge.json` using keyword matching and includes those facts in a prompt to Gemini.
+3. The backend finds relevant service information in `backend/knowledge.json` using keyword matching and includes those facts in a prompt to Gemini.
 4. The response and matched knowledge topics return to the frontend. For voice calls, the browser reads the response aloud using speech synthesis.
 5. When a call ends, the backend asks Gemini to extract lead details, sentiment, lead score, summary, and demo booking information, then saves the result in MongoDB.
 6. The dashboard loads recent saved calls and displays lead details, summaries, and matched topics.
@@ -66,7 +66,7 @@ Example chat request:
 
 ```json
 {
-  "message": "What plans do you offer?",
+  "message": "What services do you provide?",
   "history": [],
   "language": "en-IN"
 }
@@ -79,7 +79,7 @@ Use `"hi-IN"` for Hindi responses. The `history` field is an array of transcript
 ```text
 backend/
   models/Call.js       Mongoose schema for saved calls and leads
-  knowledge.json       Product facts and retrieval keywords
+  knowledge.json       Company service facts and retrieval keywords
   server.js            Express API, Gemini calls, and MongoDB integration
 frontend/
   src/App.jsx          Voice/text interface and CRM dashboard
